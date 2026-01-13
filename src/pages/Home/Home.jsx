@@ -30,7 +30,7 @@ owIDAQAB
     <div className="h-screen w-full flex  items-center justify-center">
       <form className="flex flex-col gap-y-5" onSubmit={onSubmit}>
         <input
-          className="border px-3 py-2 rounded"
+          className="border px-3 py-2 rounded h-[300px] w-[500px]"
           onChange={(e) => setText(e.target.value)}
           type="text"
           placeholder="type anything"
