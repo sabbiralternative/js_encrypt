@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { AxiosSecure } from "../../lib/AxiosSecure";
 import { API } from "../../api";
 import { JSEncrypt } from "jsencrypt";
+import axios from "axios";
 
 const Home = () => {
   const [text, setText] = useState("");
+
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -14,7 +15,7 @@ const Home = () => {
     encryptor.setPublicKey(publicKey);
     const encrypted = encryptor.encrypt(JSON.stringify({ data: text }));
 
-    const { data } = await AxiosSecure.post(API.decrypt, encrypted);
+    const { data } = await axios.post(API.decrypt, encrypted);
     console.log(data);
   };
   return (
