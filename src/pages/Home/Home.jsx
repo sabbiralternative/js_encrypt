@@ -2,6 +2,7 @@ import { useState } from "react";
 import { API } from "../../api";
 import { JSEncrypt } from "jsencrypt";
 import axios from "axios";
+import CryptoJS from "crypto-js";
 
 const Home = () => {
   const [text, setText] = useState("");
@@ -9,7 +10,6 @@ const Home = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    const encryptor = new JSEncrypt();
     const publicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1oPV6JCZUNzro3heK3II
 XmRp9LtFZvzzXBJK8l3U24tIZayZJ/ddcKf0jDR1tRW3mYnWRIuhF60kyOR5iDX3
@@ -19,11 +19,27 @@ qCPvTqH2RHDIT0WcXT7DDLOjwAJJHoCVfvBqmMptHir1a1izUlIPXHPYuZ5EMpLu
 +XsrTOQHSOHz+NG6MUA2OB2Ay7YgtAq4JxbP0J6896QGv1wYwQTG74QWBy1NuolI
 owIDAQAB
 -----END PUBLIC KEY-----`;
+    const sessionKey =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
 
-    encryptor.setPublicKey(publicKey);
-    const encrypted = encryptor.encrypt(JSON.stringify(text));
+    // 2. Encrypt the Big Data with AES
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(text),
+      sessionKey
+    ).toString();
 
-    const { data } = await axios.post(API.decrypt, { token: encrypted });
+    // 3. Encrypt the Session Key with RSA (Public Key)
+    const rsaEncryptor = new JSEncrypt();
+    rsaEncryptor.setPublicKey(publicKey);
+    const encryptedKey = rsaEncryptor.encrypt(sessionKey);
+
+    // 4. Send both pieces to the server
+
+    const { data } = await axios.post(API.decrypt, {
+      key: encryptedKey, // RSA Encrypted Key (Safe)
+      data: encryptedData, // AES Encrypted Data
+    });
     console.log(data);
   };
   return (
